@@ -25,6 +25,9 @@ const baseTheme = createTheme({
     primary: {
       main: "#EA1506",
     },
+    background: {
+      default: "black",
+    },
   },
 });
 

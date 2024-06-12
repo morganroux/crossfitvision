@@ -1,8 +1,6 @@
 "use client";
 
 import MyDropzone from "@/components/MyDropZone";
-import TaskPage from "@/components/TaskPage";
-import { useMyMediaQueries } from "@/hooks/useMyMediaQueries";
 import { startCount } from "@/services/backendApi/count";
 import { getTasks } from "@/services/backendApi/tasks";
 import { putFileToS3 } from "@/services/nextApi/files";
@@ -13,12 +11,14 @@ import {
   CircularProgress,
   Container,
   Divider,
+  IconButton,
   Stack,
   Typography,
   keyframes,
 } from "@mui/material";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 const shake = keyframes`
   0%,
@@ -52,23 +52,17 @@ const shake = keyframes`
 const IndexPage = () => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const { matchMobile } = useMyMediaQueries();
+  const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [tasks, setTasks] = useState<string[]>([]);
-  const [taskId, setTaskId] = useState<string | null>(null);
-  // const { storeFile } = filesHandler;
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    setUploadFiles(Array.from(files));
-  };
+  const tasksContainerRef = useRef<HTMLDivElement>(null);
+  const [taskIds, setTaskIds] = useState<string[]>([]);
 
   const handleSend = async () => {
     setLoading(true);
     try {
       const url = await putFileToS3(uploadFiles[0]);
       const { task_id } = await startCount({ url, task: "pull-ups-simple" });
-      setTaskId(task_id);
+      router.push(`/tasks/${task_id}`);
     } catch (error) {
       console.error(error);
     }
@@ -77,13 +71,16 @@ const IndexPage = () => {
 
   const fetchTasks = async () => {
     const data = await getTasks();
-    setTasks(data.tasks);
+    setTaskIds(data.tasks);
   };
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
+  const handleScrollToTasks = () => {
+    tasksContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
   return (
     <>
       <Container
@@ -138,73 +135,72 @@ const IndexPage = () => {
         </Typography>
 
         <Container sx={{ position: "relative", zIndex: 2 }}>
-          {!taskId ? (
-            <>
-              <Stack alignItems="center">
-                <Typography variant="h5" textAlign="center">
-                  Load a file to start a new analysis
-                </Typography>
-                <Box sx={{ my: 1 }} />
-                <Box>
-                  <MyDropzone
-                    handleChange={(files: File[]) => setUploadFiles(files)}
-                    disabled={loading}
-                    files={uploadFiles}
-                  />
-                </Box>
-                <Box sx={{ my: 1 }} />
+          <Stack alignItems="center">
+            <Typography variant="h5" textAlign="center">
+              Load a file to start a new analysis
+            </Typography>
+            <Box sx={{ my: 1 }} />
+            <Box>
+              <MyDropzone
+                handleChange={(files: File[]) => setUploadFiles(files)}
+                disabled={loading}
+                files={uploadFiles}
+              />
+            </Box>
+            <Box sx={{ my: 1 }} />
 
-                {loading ? (
-                  <CircularProgress />
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSend}
-                    disabled={!uploadFiles.length}
-                    sx={{
-                      transition:
-                        "color 0.3s ease-in-out, background-color 0.3s ease-in-out",
-                    }}
-                  >
-                    Start analysis
-                  </Button>
-                )}
-                <Box sx={{ my: 4 }} />
-                <Typography variant="h5" textAlign="center">
-                  or select a previous one
-                </Typography>
-                <Box sx={{ my: 1 }} />
-                <ExpandCircleDown
-                  fontSize="large"
-                  sx={{ animation: `${shake} 3s ease 0s infinite normal` }}
-                />
-              </Stack>
-            </>
-          ) : (
-            <TaskPage taskId={taskId} setTaskId={setTaskId} />
-          )}
+            {loading ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSend}
+                disabled={!uploadFiles.length}
+                sx={{
+                  transition:
+                    "color 0.3s ease-in-out, background-color 0.3s ease-in-out",
+                }}
+              >
+                Start analysis
+              </Button>
+            )}
+            <Box sx={{ my: 4 }} />
+            <Typography variant="h5" textAlign="center">
+              or select a previous one
+            </Typography>
+            <Box sx={{ my: 1 }} />
+            <IconButton onClick={handleScrollToTasks}>
+              <ExpandCircleDown
+                fontSize="large"
+                sx={{ animation: `${shake} 3s ease 0s infinite normal` }}
+              />
+            </IconButton>
+          </Stack>
         </Container>
       </Container>
-      <Divider sx={{ my: 4 }} />
-      <Stack alignItems="center">
-        {tasks.length ? (
-          tasks.map((task) => (
-            <Button
-              key={task}
-              variant="contained"
-              color="primary"
-              onClick={() => setTaskId(task)}
-            >
-              {task}
-            </Button>
-          ))
-        ) : (
-          <Typography variant="h6" textAlign="center">
-            No previous tasks
-          </Typography>
-        )}
-      </Stack>
+
+      <Container ref={tasksContainerRef} sx={{ height: "100vh" }}>
+        <Divider sx={{ my: 4 }} />
+        <Stack alignItems="center">
+          {taskIds?.length ? (
+            taskIds.map((taskId) => (
+              <Button
+                key={taskId}
+                variant="contained"
+                color="primary"
+                onClick={() => router.push(`/tasks/${taskId}`)}
+              >
+                {taskId}
+              </Button>
+            ))
+          ) : (
+            <Typography variant="h6" textAlign="center">
+              No previous tasks
+            </Typography>
+          )}
+        </Stack>
+      </Container>
     </>
   );
 };

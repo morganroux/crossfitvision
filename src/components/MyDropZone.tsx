@@ -1,6 +1,5 @@
-import { useMyMediaQueries } from "@/hooks/useMyMediaQueries";
 import { Close, CloudUpload } from "@mui/icons-material";
-import { IconButton, Paper, Stack, Typography } from "@mui/material";
+import { IconButton, Paper, Stack, Typography, useTheme } from "@mui/material";
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -11,8 +10,7 @@ const MyDropzone = (props: {
 }) => {
   const { handleChange, disabled } = props;
   const [dragIn, setDragIn] = React.useState<boolean>(false);
-
-  const { matchMobile } = useMyMediaQueries();
+  const theme = useTheme();
   const onDrop = (acceptedFiles: File[]) => {
     setDragIn(false);
     handleChange(acceptedFiles);
@@ -34,9 +32,9 @@ const MyDropzone = (props: {
   return (
     <Paper
       sx={{
-        ...(matchMobile
-          ? { width: "90vw", height: "100px" }
-          : { width: (theme) => theme.spacing(70), height: "150px" }),
+        [theme.breakpoints.down("md")]: { width: "90vw", height: "100px" },
+        width: (theme) => theme.spacing(70),
+        height: "150px",
       }}
     >
       {props.files.length > 0 ? (
