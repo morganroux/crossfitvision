@@ -8,11 +8,11 @@ export const getTasks = async () => {
   return data;
 };
 
-interface GetTaskResponse {
+export interface GetTaskResponse {
   task: string;
-  count: 0;
+  count: number;
   rep_frames: number[];
-  step_frames: number[];
+  step_frames: (null | number)[][];
   uncertain_frames: number[];
   uuid: string;
   url: string;

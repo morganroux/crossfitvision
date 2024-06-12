@@ -3,11 +3,11 @@ import axiosBetterStacktrace from "axios-better-stacktrace";
 
 // This api should be used only client side
 
-const nextApi = axios.create({
+const backendApi = axios.create({
   timeout: 30000,
 });
 
-axiosBetterStacktrace(nextApi);
+axiosBetterStacktrace(backendApi);
 
 // nextApi.interceptors.request.use(async (axiosConfig) => {
 //   if (typeof sessionStorage === "undefined") return axiosConfig;
@@ -19,7 +19,7 @@ axiosBetterStacktrace(nextApi);
 //   return axiosConfig;
 // });
 
-export default nextApi;
+export default backendApi;
 
 // export default async function nextApiWithErrorHandling<T = any>(
 //   config: AxiosRequestConfig<T>
