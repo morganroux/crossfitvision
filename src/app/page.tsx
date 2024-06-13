@@ -127,8 +127,6 @@ const IndexPage = () => {
         <Typography
           variant="h1"
           textAlign="center"
-          color="primary"
-          textTransform="uppercase"
           sx={{ zIndex: 2, position: "relative", flex: 1 }}
         >
           crossfit vision

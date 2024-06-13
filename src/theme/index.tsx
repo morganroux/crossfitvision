@@ -36,6 +36,8 @@ const theme = createTheme(baseTheme, {
     h1: {
       fontFamily: alternateGothic.style.fontFamily,
       fontSize: "10em",
+      color: baseTheme.palette.primary.main,
+      textTransform: "uppercase",
       [baseTheme.breakpoints.down("md")]: {
         fontSize: "9em",
       },

@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 
@@ -19,8 +20,6 @@ const MyReactPlayer = (props: {
   });
 
   const handleProgress = ({ playedSeconds }: { playedSeconds: number }) => {
-    console.log(playedSeconds);
-
     if (playedSeconds > props.end) {
       player.current?.seekTo(props.start, "seconds");
     }
@@ -45,4 +44,4 @@ const MyReactPlayer = (props: {
   );
 };
 
-export default MyReactPlayer;
+export default React.memo(MyReactPlayer);
