@@ -53,13 +53,15 @@ const theme = createTheme(baseTheme, {
       fontFamily: alternateGothic.style.fontFamily,
     },
     h4: {
-      fontFamily: helvetica.style.fontFamily,
+      fontFamily: alternateGothic.style.fontFamily,
     },
     h5: {
-      fontFamily: helvetica.style.fontFamily,
+      fontFamily: alternateGothic.style.fontFamily,
+      color: baseTheme.palette.primary.main,
+      textTransform: "uppercase",
     },
     h6: {
-      fontFamily: helvetica.style.fontFamily,
+      fontFamily: alternateGothic.style.fontFamily,
     },
   },
 });

@@ -16,8 +16,9 @@ import {
   IconButton,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./page.css";
 
 const videos = [
@@ -30,29 +31,30 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
   const [status, setStatus] = useState<"good" | "bad" | "notsure" | null>(null);
   const [videoIdx, setVideoIdx] = useState(0);
   const [slideDirection, setSlideDirection] = useState("");
-
+  const theme = useTheme();
   useEffect(() => {
     (async () => {
       const t = await getTask(params.taskId);
       setTask(t);
     })();
   }, [params.taskId]);
-  const handlePrev = () => {
+
+  const handlePrev = useCallback(() => {
     setSlideDirection("slideOutLeft");
     setTimeout(() => {
-      setVideoIdx((idx) => (idx - 1) % videos.length);
+      setVideoIdx((idx) => (idx - 1 + videos.length) % videos.length);
       setSlideDirection("slideInRight");
     }, 200);
-  };
-  const handleNext = () => {
+  }, []);
+
+  const handleNext = useCallback(() => {
     setSlideDirection("slideOutRight");
     setTimeout(() => {
       setVideoIdx((idx) => (idx + 1) % videos.length);
       setSlideDirection("slideInLeft");
     }, 200);
-  };
-
-  const handleBad = () => {
+  }, []);
+  const handleBad = useCallback(() => {
     setStatus((status) => {
       if (status === "bad") return "bad";
       else {
@@ -60,8 +62,8 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
         return "bad";
       }
     });
-  };
-  const handleGood = () => {
+  }, [handleNext]);
+  const handleGood = useCallback(() => {
     setStatus((status) => {
       if (status === "good") return "good";
       else {
@@ -69,8 +71,8 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
         return "good";
       }
     });
-  };
-  const handleNotSure = () => {
+  }, [handleNext]);
+  const handleNotSure = useCallback(() => {
     setStatus((status) => {
       if (status === "notsure") return "notsure";
       else {
@@ -78,7 +80,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
         return "notsure";
       }
     });
-  };
+  }, [handleNext]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -102,19 +104,18 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
           break;
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [handleBad, handleGood, handleNext, handlePrev, handleNotSure]);
 
   return (
-    <Container>
+    <Container sx={{ height: "100%" }}>
       <Typography variant="h3">{`Task Page ${params.taskId}`} </Typography>
 
       {task ? (
-        <Stack flexDirection="column" alignContent="center">
+        <Stack flexDirection="column" alignContent="center" height="80%">
           <Typography
             gutterBottom
             variant="h5"
@@ -124,12 +125,21 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             flexDirection="row"
             justifyContent="center"
             alignItems="center"
+            gap={2}
+            flex={1}
           >
             <IconButton
               onClick={handlePrev}
               sx={{ background: (theme) => theme.palette.background.paper }}
             >
-              <ChevronLeft sx={{ fontSize: 40 }} />
+              <ChevronLeft
+                sx={{
+                  fontSize: 40,
+                  [theme.breakpoints.down("md")]: {
+                    fontSize: 30,
+                  },
+                }}
+              />
             </IconButton>
             <Box overflow="hidden">
               <div className={slideDirection}>
@@ -138,9 +148,18 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             </Box>
             <IconButton
               onClick={handleNext}
-              sx={{ background: (theme) => theme.palette.background.paper }}
+              sx={{
+                background: (theme) => theme.palette.background.paper,
+              }}
             >
-              <ChevronRight sx={{ fontSize: 40 }} />
+              <ChevronRight
+                sx={{
+                  fontSize: 40,
+                  [theme.breakpoints.down("md")]: {
+                    fontSize: 30,
+                  },
+                }}
+              />
             </IconButton>
           </Stack>
           <Box sx={{ py: 2 }} />

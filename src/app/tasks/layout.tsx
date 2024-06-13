@@ -18,7 +18,7 @@ import {
 import { useState } from "react";
 
 const drawerWidth = 240;
-
+import theme from "@/theme";
 const DashboardLayout = ({
   children,
 }: Readonly<{
@@ -46,11 +46,7 @@ const DashboardLayout = ({
           >
             {open ? <Close /> : <MenuIcon />}
           </IconButton>
-          <Typography
-            variant="h1"
-            noWrap
-            sx={{ fontSize: (theme) => theme.typography.h5.fontSize }}
-          >
+          <Typography variant="h5" noWrap>
             crossfit vision
           </Typography>
         </Toolbar>
@@ -97,7 +93,13 @@ const DashboardLayout = ({
         </Box>
       </Drawer>
       <Toolbar />
-      {children}
+      <Box
+        sx={{
+          height: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
+        }}
+      >
+        {children}
+      </Box>
     </>
   );
 };

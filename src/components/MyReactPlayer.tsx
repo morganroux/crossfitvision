@@ -39,6 +39,8 @@ const MyReactPlayer = (props: {
         playing
         onProgress={handleProgress}
         onReady={handleReady}
+        height="550px"
+        width="300px"
       />
     )
   );

@@ -7,7 +7,7 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(-100%);
+    transform: translateX(-200%);
     visibility: hidden;
   }
 }
@@ -18,7 +18,7 @@
 
 @keyframes slideInRight {
   from {
-    transform: translateX(100%);
+    transform: translateX(200%);
     visibility: hidden;
   }
   to {
@@ -36,7 +36,7 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(100%);
+    transform: translateX(200%);
     visibility: hidden;
   }
 }
@@ -47,7 +47,7 @@
 
 @keyframes slideInLeft {
   from {
-    transform: translateX(-100%);
+    transform: translateX(-200%);
     visibility: hidden;
   }
   to {
