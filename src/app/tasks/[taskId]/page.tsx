@@ -1,44 +1,20 @@
 "use client";
 
-import MyReactPlayer from "@/components/MyReactPlayer";
 import { GetTaskResponse, getTask } from "@/services/backendApi/tasks";
-import {
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  QuestionMark,
-  ThumbDown,
-} from "@mui/icons-material";
+import { Gavel, Start } from "@mui/icons-material";
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
-  IconButton,
   Stack,
   Typography,
-  keyframes,
-  useTheme,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
-import "./page.css";
-import { String } from "aws-sdk/clients/apigateway";
-
-const videos = [
-  "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-04-24+at+19.56.05.mp4",
-  "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-05-17+at+19.51.12.mp4",
-];
-
-const blink = (color1: string, color2: String) => keyframes`
-  0%, 100% {background-color:${color2};}
-  50% {background-color: ${color1};}
-`;
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const TaskPage = ({ params }: { params: { taskId: string } }) => {
-  const [task, setTask] = useState<GetTaskResponse>();
-  const [status, setStatus] = useState<"good" | "bad" | "notsure" | null>(null);
-  const [videoIdx, setVideoIdx] = useState(0);
-  const [slideDirection, setSlideDirection] = useState("");
-  const theme = useTheme();
+  const [task, setTask] = useState<GetTaskResponse | null>(null);
   useEffect(() => {
     (async () => {
       const t = await getTask(params.taskId);
@@ -46,169 +22,70 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
     })();
   }, [params.taskId]);
 
-  const handlePrev = useCallback(() => {
-    setSlideDirection("slideOutLeft");
-    setTimeout(() => {
-      setVideoIdx((idx) => (idx - 1 + videos.length) % videos.length);
-      setSlideDirection("slideInRight");
-    }, 200);
-  }, []);
-
-  const handleNext = useCallback(() => {
-    setSlideDirection("slideOutRight");
-    setTimeout(() => {
-      setVideoIdx((idx) => (idx + 1) % videos.length);
-      setSlideDirection("slideInLeft");
-    }, 200);
-  }, []);
-
-  const handleBad = useCallback(async () => {
-    setStatus("bad");
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    handleNext();
-  }, [handleNext]);
-
-  const handleGood = useCallback(async () => {
-    setStatus("good");
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    handleNext();
-  }, [handleNext]);
-  const handleNotSure = useCallback(async () => {
-    setStatus("notsure");
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    handleNext();
-  }, [handleNext]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      switch (event.key) {
-        case "a":
-          handleBad();
-          break;
-        case "z":
-          handleNotSure();
-          break;
-        case "e":
-          handleGood();
-          break;
-        case "ArrowLeft":
-          handlePrev();
-          break;
-        case "ArrowRight":
-          handleNext();
-          break;
-        default:
-          break;
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleBad, handleGood, handleNext, handlePrev, handleNotSure]);
-
+  const router = useRouter();
   return (
     <Container sx={{ height: "100%" }}>
-      <Typography variant="h3">{`Task Page ${params.taskId}`} </Typography>
-
+      <Typography variant="h3">{`Task ${task?.uuid}`}</Typography>
+      <Box sx={{ py: 4 }} />
       {task ? (
-        <Stack flexDirection="column" alignContent="center" height="80%">
-          <Typography
-            gutterBottom
-            variant="h5"
-            align="center"
-          >{`Rep ${videoIdx + 1}/${videos.length}`}</Typography>
+        <Stack flexDirection="column" gap={2} sx={{ maxWidth: "50%" }}>
           <Stack
             flexDirection="row"
-            justifyContent="center"
             alignItems="center"
-            gap={2}
-            flex={1}
+            justifyContent="space-between"
           >
-            <IconButton
-              onClick={handlePrev}
-              sx={{ background: (theme) => theme.palette.background.paper }}
+            <Typography variant="h4" gutterBottom>
+              {`Valid reps : ${task?.rep_frames?.length}`}
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<Start />}
+              onClick={() => router.push(`${params.taskId}/good`)}
             >
-              <ChevronLeft
-                sx={{
-                  fontSize: 40,
-                  [theme.breakpoints.down("md")]: {
-                    fontSize: 30,
-                  },
-                }}
-              />
-            </IconButton>
-            <Box overflow="hidden">
-              <div className={slideDirection}>
-                <MyReactPlayer video={videos[videoIdx]} start={2} end={3} />
-              </div>
-            </Box>
-            <IconButton
-              onClick={handleNext}
-              sx={{
-                background: (theme) => theme.palette.background.paper,
-              }}
-            >
-              <ChevronRight
-                sx={{
-                  fontSize: 40,
-                  [theme.breakpoints.down("md")]: {
-                    fontSize: 30,
-                  },
-                }}
-              />
-            </IconButton>
+              Check
+            </Button>
           </Stack>
-          <Box sx={{ py: 2 }} />
           <Stack
             flexDirection="row"
-            justifyContent="center"
             alignItems="center"
-            gap={2}
+            justifyContent="space-between"
           >
+            <Typography variant="h4" gutterBottom>
+              {`Failed reps : ${task?.failed_frames.length}`}
+            </Typography>
             <Button
-              onClick={handleBad}
-              variant={status === "bad" ? "contained" : "outlined"}
-              sx={{
-                animation:
-                  status === "bad"
-                    ? `${blink(theme.palette.primary.main, theme.palette.primary.dark)} 0.15s 3`
-                    : undefined,
-              }}
-              startIcon={<ThumbDown color="error" />}
+              variant="outlined"
+              color="primary"
+              startIcon={<Start />}
+              onClick={() => router.push(`${params.taskId}/bad`)}
             >
-              Bad Rep
+              Check
             </Button>
+          </Stack>
+          <Stack
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography variant="h4" gutterBottom>
+              {`Uncertain reps : ${task?.uncertain_frames.length}`}
+            </Typography>
             <Button
-              onClick={handleNotSure}
-              variant={status === "notsure" ? "contained" : "outlined"}
-              sx={{
-                animation:
-                  status === "notsure"
-                    ? `${blink(theme.palette.primary.main, theme.palette.primary.dark)} 0.15s 3`
-                    : undefined,
-              }}
-              startIcon={<QuestionMark color="info" />}
+              variant="outlined"
+              color="primary"
+              startIcon={<Start />}
+              onClick={() => router.push(`${params.taskId}/notsure`)}
             >
-              Not Sure
-            </Button>
-            <Button
-              onClick={handleGood}
-              variant={status === "good" ? "contained" : "outlined"}
-              sx={{
-                animation:
-                  status === "good"
-                    ? `${blink(theme.palette.primary.main, theme.palette.primary.dark)} 0.15s 3`
-                    : undefined,
-              }}
-              startIcon={<CheckCircle color="success" />}
-            >
-              Good Rep
+              Check
             </Button>
           </Stack>
         </Stack>
       ) : (
-        <Typography>Loading...</Typography>
+        <Stack flexDirection="row">
+          <Typography variant="h5">Loading...</Typography>
+          <CircularProgress />
+        </Stack>
       )}
     </Container>
   );
