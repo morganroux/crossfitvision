@@ -1,7 +1,6 @@
 "use client";
 
 import MyReactPlayer from "@/components/MyReactPlayer";
-import { GetTaskResponse, getTask } from "@/services/backendApi/tasks";
 import {
   ArrowBack,
   CheckCircle,
@@ -21,40 +20,45 @@ import {
   useTheme,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import "./page.css";
-import { useRouter } from "next/navigation";
+import { RepMarker, RepStatus } from "../app/tasks/[taskId]/page";
 
-const videos = [
-  "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-04-24+at+19.56.05.mp4",
-  "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-05-17+at+19.51.12.mp4",
-];
+// const videos = [
+//   "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-04-24+at+19.56.05.mp4",
+//   "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-05-17+at+19.51.12.mp4",
+// ];
 
 const blink = (color1: string, color2: string) => keyframes`
   0%, 100% {background-color:${color2};}
   50% {background-color: ${color1};}
 `;
 
-const TaskPage = () => {
-  const [status, setStatus] = useState<"good" | "bad" | "notsure" | null>(null);
-  const [videoIdx, setVideoIdx] = useState(0);
+const CheckReps = (props: {
+  goBack: () => void;
+  status: RepStatus;
+  markers: RepMarker[];
+  video: string;
+}) => {
+  const { markers, video } = props;
+  const [status, setStatus] = useState<RepStatus | null>(null);
+  const [markerIdx, setMarkerIdx] = useState(0);
   const [slideDirection, setSlideDirection] = useState("");
   const theme = useTheme();
 
   const handlePrev = useCallback(() => {
     setSlideDirection("slideOutLeft");
     setTimeout(() => {
-      setVideoIdx((idx) => (idx - 1 + videos.length) % videos.length);
+      setMarkerIdx((idx) => (idx - 1 + markers.length) % markers.length);
       setSlideDirection("slideInRight");
     }, 200);
-  }, []);
+  }, [markers.length]);
 
   const handleNext = useCallback(() => {
     setSlideDirection("slideOutRight");
     setTimeout(() => {
-      setVideoIdx((idx) => (idx + 1) % videos.length);
+      setMarkerIdx((idx) => (idx + 1) % markers.length);
       setSlideDirection("slideInLeft");
     }, 200);
-  }, []);
+  }, [markers.length]);
 
   const handleBad = useCallback(async () => {
     setStatus("bad");
@@ -100,16 +104,21 @@ const TaskPage = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleBad, handleGood, handleNext, handlePrev, handleNotSure]);
-  const router = useRouter();
+
+  const title = {
+    bad: "Failed reps",
+    notsure: "Uncertain reps",
+    good: "Valid reps",
+  };
   return (
     <Container sx={{ height: "100%" }}>
       <Typography variant="h3" gutterBottom>
-        Task Page{" "}
+        {title[props.status]}
       </Typography>
       <Button
         variant="outlined"
         startIcon={<ArrowBack />}
-        onClick={() => router.back()}
+        onClick={props.goBack}
       >
         Back
       </Button>
@@ -118,7 +127,7 @@ const TaskPage = () => {
           gutterBottom
           variant="h5"
           align="center"
-        >{`Rep ${videoIdx + 1}/${videos.length}`}</Typography>
+        >{`Rep ${markerIdx + 1}/${markers.length}`}</Typography>
         <Stack
           flexDirection="row"
           justifyContent="center"
@@ -141,7 +150,11 @@ const TaskPage = () => {
           </IconButton>
           <Box overflow="hidden">
             <div className={slideDirection}>
-              <MyReactPlayer video={videos[videoIdx]} start={2} end={3} />
+              <MyReactPlayer
+                video={video}
+                start={markers[markerIdx].in_out[0]}
+                end={markers[markerIdx].in_out[1]}
+              />
             </div>
           </Box>
           <IconButton
@@ -212,4 +225,4 @@ const TaskPage = () => {
   );
 };
 
-export default TaskPage;
+export default CheckReps;
