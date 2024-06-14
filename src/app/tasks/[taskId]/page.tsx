@@ -16,15 +16,22 @@ import {
   IconButton,
   Stack,
   Typography,
+  keyframes,
   useTheme,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import "./page.css";
+import { String } from "aws-sdk/clients/apigateway";
 
 const videos = [
   "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-04-24+at+19.56.05.mp4",
   "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-05-17+at+19.51.12.mp4",
 ];
+
+const blink = (color1: string, color2: String) => keyframes`
+  0%, 100% {background-color:${color2};}
+  50% {background-color: ${color1};}
+`;
 
 const TaskPage = ({ params }: { params: { taskId: string } }) => {
   const [task, setTask] = useState<GetTaskResponse>();
@@ -54,32 +61,22 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
       setSlideDirection("slideInLeft");
     }, 200);
   }, []);
-  const handleBad = useCallback(() => {
-    setStatus((status) => {
-      if (status === "bad") return "bad";
-      else {
-        setTimeout(handleNext, 300);
-        return "bad";
-      }
-    });
+
+  const handleBad = useCallback(async () => {
+    setStatus("bad");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    handleNext();
   }, [handleNext]);
-  const handleGood = useCallback(() => {
-    setStatus((status) => {
-      if (status === "good") return "good";
-      else {
-        setTimeout(handleNext, 300);
-        return "good";
-      }
-    });
+
+  const handleGood = useCallback(async () => {
+    setStatus("good");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    handleNext();
   }, [handleNext]);
-  const handleNotSure = useCallback(() => {
-    setStatus((status) => {
-      if (status === "notsure") return "notsure";
-      else {
-        setTimeout(handleNext, 300);
-        return "notsure";
-      }
-    });
+  const handleNotSure = useCallback(async () => {
+    setStatus("notsure");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    handleNext();
   }, [handleNext]);
 
   useEffect(() => {
@@ -172,6 +169,12 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             <Button
               onClick={handleBad}
               variant={status === "bad" ? "contained" : "outlined"}
+              sx={{
+                animation:
+                  status === "bad"
+                    ? `${blink(theme.palette.primary.main, theme.palette.primary.dark)} 0.15s 3`
+                    : undefined,
+              }}
               startIcon={<ThumbDown color="error" />}
             >
               Bad Rep
@@ -179,6 +182,12 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             <Button
               onClick={handleNotSure}
               variant={status === "notsure" ? "contained" : "outlined"}
+              sx={{
+                animation:
+                  status === "notsure"
+                    ? `${blink(theme.palette.primary.main, theme.palette.primary.dark)} 0.15s 3`
+                    : undefined,
+              }}
               startIcon={<QuestionMark color="info" />}
             >
               Not Sure
@@ -186,6 +195,12 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             <Button
               onClick={handleGood}
               variant={status === "good" ? "contained" : "outlined"}
+              sx={{
+                animation:
+                  status === "good"
+                    ? `${blink(theme.palette.primary.main, theme.palette.primary.dark)} 0.15s 3`
+                    : undefined,
+              }}
               startIcon={<CheckCircle color="success" />}
             >
               Good Rep
