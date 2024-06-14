@@ -28,7 +28,7 @@ export const getTask = async (taskId: string) => {
     failed_rep_count: 5,
     step_frames: [],
     rep_frames: [1, 3, 5, 7],
-    failed_frames: [1, 2, 4, 8],
+    failed_frames: [2, 4, 8],
     uncertain_frames: [],
     uuid: "lkjzdslckj",
     url: "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-04-24+at+19.56.05.mp4",

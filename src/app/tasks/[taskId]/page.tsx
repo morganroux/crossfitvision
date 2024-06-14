@@ -11,11 +11,16 @@ import {
   Typography,
 } from "@mui/material";
 import "./page.css";
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import CheckReps from "@/components/CheckReps";
+import { useRouter } from "next/navigation";
 
 export type RepStatus = "good" | "bad" | "notsure";
-export type RepMarker = { in_out: [number, number]; status: RepStatus };
+export type RepMarker = {
+  in_out: [number, number];
+  status: RepStatus;
+  frame: number;
+};
 
 const getMarkers = (t: GetTaskResponse) => {
   const orderedSteps = [
@@ -40,14 +45,18 @@ const getMarkers = (t: GetTaskResponse) => {
   const markers: RepMarker[] = [
     ...t.failed_frames.map((frame) => ({
       in_out: findClosest(frame),
+      frame,
       status: "bad" as RepStatus,
     })),
     ...t.rep_frames.map((frame) => ({
       in_out: findClosest(frame),
+      frame,
+
       status: "good" as RepStatus,
     })),
     ...t.uncertain_frames.map((frame) => ({
       in_out: findClosest(frame),
+      frame,
       status: "notsure" as RepStatus,
     })),
   ];
@@ -55,10 +64,11 @@ const getMarkers = (t: GetTaskResponse) => {
 };
 
 const TaskPage = ({ params }: { params: { taskId: string } }) => {
+  const router = useRouter();
   const [task, setTask] = useState<GetTaskResponse | null>(null);
   const [markers, setMarkers] = useState<RepMarker[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<RepStatus | null>(null);
-  const [currentMarkers, setCurrentMarkers] = useState<RepMarker[]>([]);
+  const [currentFrames, setCurrentFrames] = useState<number[]>([]);
   useEffect(() => {
     (async () => {
       const t = await getTask(params.taskId);
@@ -74,8 +84,19 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
 
   const handleCheck = (status: RepStatus) => {
     setSelectedStatus(status);
-    setCurrentMarkers(markers.filter((m) => m.status === status));
+    setCurrentFrames(
+      markers.filter((m) => m.status === status).map((m) => m.frame),
+    );
   };
+
+  const handleBack = () => router.push("/");
+  const handleUpdate = () => {
+    handleBack();
+  };
+
+  const goodMarkers = markers.filter((m) => m.status === "good");
+  const badMarkers = markers.filter((m) => m.status === "bad");
+  const notSureMarkers = markers.filter((m) => m.status === "notsure");
   return !task ? (
     <Container sx={{ height: "100%" }}>
       <Stack flexDirection="row" gap={4}>
@@ -87,7 +108,13 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
     <CheckReps
       goBack={() => setSelectedStatus(null)}
       status={selectedStatus}
-      markers={currentMarkers}
+      framesFiltered={currentFrames}
+      updateMarkerStatus={(frame, status) => {
+        setMarkers((markers) =>
+          markers.map((m) => (m.frame === frame ? { ...m, status } : m)),
+        );
+      }}
+      markers={markers}
       video={task.url}
     />
   ) : (
@@ -102,13 +129,13 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
           justifyContent="space-between"
         >
           <Typography variant="h4" gutterBottom>
-            {`Valid reps : ${task.rep_frames?.length}`}
+            {`Valid reps : ${goodMarkers.length}`}
           </Typography>
           <Button
             variant="outlined"
             color="primary"
             startIcon={<Start />}
-            disabled={task.rep_frames.length === 0}
+            disabled={goodMarkers.length === 0}
             onClick={() => handleCheck("good")}
           >
             Check
@@ -120,13 +147,13 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
           justifyContent="space-between"
         >
           <Typography variant="h4" gutterBottom>
-            {`Failed reps : ${task.failed_frames.length}`}
+            {`Failed reps : ${badMarkers.length}`}
           </Typography>
           <Button
             variant="outlined"
             color="primary"
             startIcon={<Start />}
-            disabled={task.failed_frames.length === 0}
+            disabled={badMarkers.length === 0}
             onClick={() => handleCheck("bad")}
           >
             Check
@@ -138,16 +165,29 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
           justifyContent="space-between"
         >
           <Typography variant="h4" gutterBottom>
-            {`Uncertain reps : ${task.uncertain_frames.length}`}
+            {`Uncertain reps : ${notSureMarkers.length}`}
           </Typography>
           <Button
             variant="outlined"
             color="primary"
-            disabled={task.uncertain_frames.length === 0}
+            disabled={notSureMarkers.length === 0}
             startIcon={<Start />}
             onClick={() => handleCheck("notsure")}
           >
             Check
+          </Button>
+        </Stack>
+        <Box sx={{ py: 4 }} />
+        <Stack
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Button variant="outlined" onClick={handleBack}>
+            Back
+          </Button>
+          <Button variant="contained" onClick={handleUpdate}>
+            Update results
           </Button>
         </Stack>
       </Stack>
