@@ -1,5 +1,6 @@
 "use client";
 
+import background from "../../public/pexels-2261477.jpg";
 import MyDropzone from "@/components/MyDropZone";
 import { startCount } from "@/services/backendApi/count";
 import { getTasks } from "@/services/backendApi/tasks";
@@ -115,7 +116,8 @@ const IndexPage = () => {
         }}
       > */}
         <Image
-          src="/pexels-2261477.jpg"
+          priority
+          src={background}
           alt="crossfit workout"
           fill={true}
           style={{
