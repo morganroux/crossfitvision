@@ -1,6 +1,7 @@
 import backendApi from ".";
 
 export const getTasks = async () => {
+  return { tasks: ["lkhqs"] };
   const { data } = await backendApi<{ tasks: string[] }>({
     method: "get",
     url: `/tasks`,

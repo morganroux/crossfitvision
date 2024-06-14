@@ -182,12 +182,15 @@ const IndexPage = () => {
 
       <Container ref={tasksContainerRef} sx={{ height: "100vh" }}>
         <Divider sx={{ my: 4 }} />
-        <Stack alignItems="center">
+        <Typography variant="h4" textAlign="center">
+          Previous tasks
+        </Typography>
+        <Stack alignItems="flex-start">
           {taskIds?.length ? (
             taskIds.map((taskId) => (
               <Button
+                variant="text"
                 key={taskId}
-                variant="contained"
                 color="primary"
                 onClick={() => router.push(`/tasks/${taskId}`)}
               >
