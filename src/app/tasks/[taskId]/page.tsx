@@ -9,6 +9,7 @@ import {
   Container,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import "./page.css";
 import { useEffect, useState } from "react";
@@ -65,6 +66,7 @@ const getMarkers = (t: GetTaskResponse) => {
 
 const TaskPage = ({ params }: { params: { taskId: string } }) => {
   const router = useRouter();
+  const theme = useTheme();
   const [task, setTask] = useState<GetTaskResponse | null>(null);
   const [markers, setMarkers] = useState<RepMarker[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<RepStatus | null>(null);
@@ -122,7 +124,14 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
       <Typography variant="h3">{`Task ${task.uuid}`}</Typography>
       <Box sx={{ py: 4 }} />
 
-      <Stack flexDirection="column" gap={2} sx={{ maxWidth: "50%" }}>
+      <Stack
+        flexDirection="column"
+        gap={2}
+        sx={{
+          [theme.breakpoints.up("md")]: { maxWidth: "50%" },
+          [theme.breakpoints.down("md")]: { maxWidth: "100%" },
+        }}
+      >
         <Stack
           flexDirection="row"
           alignItems="center"
