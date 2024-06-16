@@ -30,8 +30,11 @@ const getMarkers = (t: GetTaskResponse) => {
     ...t.failed_frames,
     ...t.rep_frames,
     ...t.uncertain_frames,
-    10,
+    30000, //change to duration
   ].sort((a, b) => a - b);
+  const averageRepLenght =
+    orderedSteps.reduce((acc, curr) => acc + curr, 0) / orderedSteps.length;
+
   const findClosest = (frame: number) => {
     const previousFrameIdx =
       (orderedSteps.indexOf(frame) - 1) % orderedSteps.length;
@@ -42,22 +45,28 @@ const getMarkers = (t: GetTaskResponse) => {
       number,
     ];
   };
-  const averageFrameLenght =
-    orderedSteps.reduce((acc, curr) => acc + curr, 0) / orderedSteps.length;
+  const extractWindowView = (frame: number) => {
+    const [previous, next] = findClosest(frame);
+    return [frame - (frame - previous) / 3, frame + (next - frame) / 3] as [
+      number,
+      number,
+    ];
+  };
+
   const markers: RepMarker[] = [
     ...t.failed_frames.map((frame) => ({
-      in_out: findClosest(frame),
+      in_out: extractWindowView(frame),
       frame,
       status: "bad" as RepStatus,
     })),
     ...t.rep_frames.map((frame) => ({
-      in_out: findClosest(frame),
+      in_out: extractWindowView(frame),
       frame,
 
       status: "good" as RepStatus,
     })),
     ...t.uncertain_frames.map((frame) => ({
-      in_out: findClosest(frame),
+      in_out: extractWindowView(frame),
       frame,
       status: "notsure" as RepStatus,
     })),
@@ -77,18 +86,23 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
     (async () => {
       const storage = localStorage.getItem(TASKS_KEY);
       const tasks = storage ? (JSON.parse(storage) as CachedTasks) : null;
-      if (!tasks?.[params.taskId]) {
+      let task = tasks?.[params.taskId] as Task;
+      if (!task) {
         const t = await getTask(params.taskId);
-        const task = {
+        task = {
           initial: t,
           markers: getMarkers(t),
         };
-        setTask(task);
-        localStorage.setItem(
-          TASKS_KEY,
-          JSON.stringify({ ...tasks, [params.taskId]: task })
-        );
-      } else setTask(tasks[params.taskId]);
+      }
+      task = {
+        ...task,
+        markers: getMarkers(task.initial),
+      };
+      setTask(task);
+      localStorage.setItem(
+        TASKS_KEY,
+        JSON.stringify({ ...tasks, [params.taskId]: task })
+      );
     })();
   }, [params.taskId]);
 

@@ -58,9 +58,9 @@ const CheckReps = (props: {
   const markersFiltered = useMemo(
     () =>
       markers.filter((marker) =>
-        framesFiltered.find((f) => f === marker.frame),
+        framesFiltered.find((f) => f === marker.frame)
       ),
-    [framesFiltered, markers],
+    [framesFiltered, markers]
   );
 
   const currentMarker = markersFiltered[markerIdx];
@@ -68,7 +68,7 @@ const CheckReps = (props: {
     setSlideDirection("slideOutLeft");
     setTimeout(() => {
       setMarkerIdx(
-        (idx) => (idx - 1 + markersFiltered.length) % markersFiltered.length,
+        (idx) => (idx - 1 + markersFiltered.length) % markersFiltered.length
       );
       setSlideDirection("slideInRight");
     }, 200);
@@ -170,12 +170,13 @@ const CheckReps = (props: {
               }}
             />
           </IconButton>
+
           <Box overflow="hidden">
             <div className={slideDirection}>
               <MyReactPlayer
                 video={video}
-                start={currentMarker.in_out[0]}
-                end={currentMarker.in_out[1]}
+                start={currentMarker.in_out[0] / 30} //TODO : extract frame rate or duration from video
+                end={currentMarker.in_out[1] / 30}
               />
             </div>
           </Box>
