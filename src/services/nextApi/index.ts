@@ -4,7 +4,7 @@ import axiosBetterStacktrace from "axios-better-stacktrace";
 // This api should be used only client side
 
 const nextApi = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: process.env.NEXT_PUBLIC_HOSTNAME + "/api",
   timeout: 30000,
 });
 
