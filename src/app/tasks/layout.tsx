@@ -26,7 +26,7 @@ const DashboardLayout = ({
 }>) => {
   const [open, setOpen] = useState(false);
   const toggleDrawerOpen = () => {
-    setOpen((open) => !open);
+    // setOpen((open) => !open);
   };
   return (
     <>

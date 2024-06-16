@@ -20,6 +20,7 @@
     "aws-sdk": "^2.1613.0",
     "axios": "^1.6.8",
     "axios-better-stacktrace": "^2.1.6",
+    "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
     "next": "14.2.3",
     "react": "^18",
@@ -28,6 +29,7 @@
     "react-player": "^2.16.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.5",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20",
     "@types/react": "^18",

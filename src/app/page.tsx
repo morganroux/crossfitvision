@@ -4,6 +4,7 @@ import background from "../../public/pexels-2261477.jpg";
 import MyDropzone from "@/components/MyDropZone";
 import { startCount } from "@/services/backendApi/count";
 import { getTasks } from "@/services/backendApi/tasks";
+import { CachedTasks, getCachedTasks } from "@/services/cache";
 import { putFileToS3 } from "@/services/nextApi/files";
 import { ExpandCircleDown } from "@mui/icons-material";
 import {
@@ -20,6 +21,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import _ from "lodash";
 
 const shake = keyframes`
   0%,
@@ -72,7 +74,15 @@ const IndexPage = () => {
 
   const fetchTasks = async () => {
     const data = await getTasks();
-    setTaskIds(data.tasks);
+    const tasks: CachedTasks = {};
+    data.tasks.forEach((taskId) => {
+      tasks[taskId] = null;
+    });
+    const cache = getCachedTasks();
+    _.assign(tasks, cache);
+    console.log("tasks", tasks);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    setTaskIds(tasks ? Object.keys(tasks) : []);
   };
 
   useEffect(() => {
