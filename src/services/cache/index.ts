@@ -13,6 +13,6 @@ export const TASKS_KEY = "tasks";
 
 export const getCachedTasks = () => {
   const storage = localStorage.getItem(TASKS_KEY);
-  if (!storage) return [];
+  if (!storage) return {} as CachedTasks;
   else return JSON.parse(storage) as CachedTasks;
 };

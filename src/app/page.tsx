@@ -2,11 +2,9 @@
 
 import background from "../../public/pexels-2261477.jpg";
 import MyDropzone from "@/components/MyDropZone";
-import { startCount } from "@/services/backendApi/count";
-import { getTasks } from "@/services/backendApi/tasks";
-import { CachedTasks, getCachedTasks } from "@/services/cache";
+import { getCachedTasks } from "@/services/cache";
 import { putFileToS3 } from "@/services/nextApi/files";
-import { ExpandCircleDown } from "@mui/icons-material";
+import { DeleteOutline, ExpandCircleDown } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -22,6 +20,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import _ from "lodash";
+import { startCount } from "@/services/nextApi/count";
 
 const shake = keyframes`
   0%,
@@ -64,7 +63,7 @@ const IndexPage = () => {
     setLoading(true);
     try {
       const url = await putFileToS3(uploadFiles[0]);
-      const { task_id } = await startCount({ url, task: "pull-ups-simple" });
+      const { task_id } = await startCount({ url, task: "pull-ups" });
       router.push(`/tasks/${task_id}`);
     } catch (error) {
       console.error(error);
@@ -73,16 +72,26 @@ const IndexPage = () => {
   };
 
   const fetchTasks = async () => {
-    const data = await getTasks();
-    const tasks: CachedTasks = {};
-    data.tasks.forEach((taskId) => {
-      tasks[taskId] = null;
-    });
-    const cache = getCachedTasks();
-    _.assign(tasks, cache);
-    console.log("tasks", tasks);
-    localStorage.setItem("tasks", JSON.stringify(tasks));
+    // const data = await getTasks();
+    // const tasks: CachedTasks = {};
+    // data.tasks.forEach((taskId) => {
+    //   tasks[taskId] = null;
+    // });
+    // const cache = getCachedTasks();
+    // _.assign(tasks, cache);
+    // console.log("tasks", tasks);
+    // localStorage.setItem("tasks", JSON.stringify(tasks));
+    // setTaskIds(tasks ? Object.keys(tasks) : []);
+
+    const tasks = getCachedTasks();
     setTaskIds(tasks ? Object.keys(tasks) : []);
+  };
+
+  const deleteTask = (taskId: string) => {
+    const tasks = getCachedTasks();
+    delete tasks[taskId];
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    setTaskIds(Object.keys(tasks));
   };
 
   useEffect(() => {
@@ -198,14 +207,18 @@ const IndexPage = () => {
         <Stack alignItems="flex-start">
           {taskIds?.length ? (
             taskIds.map((taskId) => (
-              <Button
-                variant="text"
-                key={taskId}
-                color="primary"
-                onClick={() => router.push(`/tasks/${taskId}`)}
-              >
-                {taskId}
-              </Button>
+              <Stack flexDirection="row" alignItems="center" key={taskId}>
+                <Button
+                  variant="text"
+                  color="primary"
+                  onClick={() => router.push(`/tasks/${taskId}`)}
+                >
+                  {taskId}
+                </Button>
+                <IconButton color="error" onClick={() => deleteTask(taskId)}>
+                  <DeleteOutline />
+                </IconButton>
+              </Stack>
             ))
           ) : (
             <Typography variant="h6" textAlign="center">

@@ -22,7 +22,7 @@ export const putFileToS3 = async (file: File) => {
 export const postFile = async (body: { filename: string }) => {
   const { data } = await nextApi<{ url: string; options: any; key: any }>({
     method: "post",
-    url: `/api/files`,
+    url: `/files`,
     data: body,
   });
   return data;

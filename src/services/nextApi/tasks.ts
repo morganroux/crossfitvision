@@ -1,12 +1,11 @@
-import backendApi from ".";
+import nextApi from ".";
 
 export const getTasks = async () => {
   // return { tasks: ["lkhqs"] };
-  const { data } = await backendApi<{ tasks: string[] }>({
+  const { data } = await nextApi<{ tasks: string[] }>({
     method: "get",
     url: `/tasks`,
   });
-  console.log("getTasks", data)
   return data;
 };
 
@@ -36,12 +35,9 @@ export const getTask = async (taskId: string) => {
   //   url: "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-04-24+at+19.56.05.mp4",
   // };
 
-  //TODO : change task to tasks
-  const { data } = await backendApi<GetTaskResponse>({
+  const { data } = await nextApi<GetTaskResponse>({
     method: "get",
-    url: `/task/${taskId}`,
+    url: `/tasks/${taskId}`,
   });
-  console.log("getTask", data)
-
   return data;
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { GetTaskResponse, getTask } from "@/services/backendApi/tasks";
+import { GetTaskResponse, getTask } from "@/services/nextApi/tasks";
 import { Start } from "@mui/icons-material";
 import {
   Box,
@@ -12,7 +12,7 @@ import {
   useTheme,
 } from "@mui/material";
 import "./page.css";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CheckReps from "@/components/CheckReps";
 import { useRouter } from "next/navigation";
 import { CachedTasks, TASKS_KEY, Task } from "@/services/cache";
