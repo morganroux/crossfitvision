@@ -6,7 +6,6 @@ export async function GET(
 ) {
   console.log("params", params);
   const data = await getTask(params.taskId);
-
   return Response.json(data);
 }
 // export async function POST(request: Request) {

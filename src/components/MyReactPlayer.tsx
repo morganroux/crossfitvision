@@ -38,6 +38,7 @@ const MyReactPlayer = (props: {
         volume={0}
         playing
         onProgress={handleProgress}
+        progressInterval={100}
         onReady={handleReady}
         height="400px"
         width="200px"

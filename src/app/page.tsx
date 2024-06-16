@@ -2,7 +2,7 @@
 
 import background from "../../public/pexels-2261477.jpg";
 import MyDropzone from "@/components/MyDropZone";
-import { getCachedTasks } from "@/services/cache";
+import { TASKS_KEY, getCachedTasks } from "@/services/cache";
 import { putFileToS3 } from "@/services/nextApi/files";
 import { DeleteOutline, ExpandCircleDown } from "@mui/icons-material";
 import {
@@ -64,11 +64,17 @@ const IndexPage = () => {
     try {
       const url = await putFileToS3(uploadFiles[0]);
       const { task_id } = await startCount({ url, task: "pull-ups" });
+      const storage = getCachedTasks();
+      localStorage.setItem(
+        TASKS_KEY,
+        JSON.stringify({ ...storage, [task_id]: null })
+      );
       router.push(`/tasks/${task_id}`);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const fetchTasks = async () => {

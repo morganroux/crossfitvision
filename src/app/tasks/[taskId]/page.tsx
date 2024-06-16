@@ -27,9 +27,9 @@ export type RepMarker = {
 const getMarkers = (t: GetTaskResponse) => {
   const orderedSteps = [
     0,
-    ...t.failed_frames,
-    ...t.rep_frames,
-    ...t.uncertain_frames,
+    ...(t.failed_frames ?? []),
+    ...(t.rep_frames ?? []),
+    ...(t.uncertain_frames ?? []),
     30000, //change to duration
   ].sort((a, b) => a - b);
   const averageRepLenght =
@@ -47,31 +47,31 @@ const getMarkers = (t: GetTaskResponse) => {
   };
   const extractWindowView = (frame: number) => {
     const [previous, next] = findClosest(frame);
-    return [frame - (frame - previous) / 3, frame + (next - frame) / 3] as [
+    return [frame - (frame - previous) / 2, frame + (next - frame) / 2] as [
       number,
       number,
     ];
   };
 
   const markers: RepMarker[] = [
-    ...t.failed_frames.map((frame) => ({
+    ...(t.failed_frames ?? []).map((frame) => ({
       in_out: extractWindowView(frame),
       frame,
       status: "bad" as RepStatus,
     })),
-    ...t.rep_frames.map((frame) => ({
+    ...(t.rep_frames ?? []).map((frame) => ({
       in_out: extractWindowView(frame),
       frame,
 
       status: "good" as RepStatus,
     })),
-    ...t.uncertain_frames.map((frame) => ({
+    ...(t.uncertain_frames ?? []).map((frame) => ({
       in_out: extractWindowView(frame),
       frame,
       status: "notsure" as RepStatus,
     })),
   ];
-  return markers;
+  return markers.sort((a, b) => a.frame - b.frame);
 };
 
 const TaskPage = ({ params }: { params: { taskId: string } }) => {
@@ -81,6 +81,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
   const [currentMarkers, setCurrentMarkers] = useState<RepMarker[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<RepStatus | null>(null);
   const [currentFrames, setCurrentFrames] = useState<number[]>([]);
+  const [errors, setErrors] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -88,25 +89,52 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
       const tasks = storage ? (JSON.parse(storage) as CachedTasks) : null;
       let task = tasks?.[params.taskId] as Task;
       if (!task) {
-        const t = await getTask(params.taskId);
-        task = {
-          initial: t,
-          markers: getMarkers(t),
-        };
+        // const intervalId = setInterval(async () => {
+          try {
+            const t = await getTask(params.taskId);
+            if ("message" in t) {
+              setErrors(t.message as string);
+              return;
+            }
+            if (t) {
+              {
+                const markers = getMarkers(t);
+                task = {
+                  initial: t,
+                  markers: markers,
+                };
+              }
+              // clearInterval(intervalId);
+              setErrors(null);
+              setTask(task);
+              localStorage.setItem(
+                TASKS_KEY,
+                JSON.stringify({ ...tasks, [params.taskId]: task })
+              );
+            }
+          } catch (err) {
+            console.error(err);
+            setErrors("Error while fetching analysis");
+            // clearInterval(intervalId);
+          }
+        // }, 5000);
+      } else {
+        // Uncomment to reinit marker generation
+        // task = {
+        //   ...task,
+        //   markers: getMarkers(task.initial),
+        // };
+        // localStorage.setItem(
+        //   TASKS_KEY,
+        //   JSON.stringify({ ...tasks, [params.taskId]: task })
+        // );
+        setTask(task);
       }
-      task = {
-        ...task,
-        markers: getMarkers(task.initial),
-      };
-      setTask(task);
-      localStorage.setItem(
-        TASKS_KEY,
-        JSON.stringify({ ...tasks, [params.taskId]: task })
-      );
     })();
   }, [params.taskId]);
 
   useEffect(() => {
+    console.log("Task: ", task);
     if (task) setCurrentMarkers(task.markers);
   }, [task]);
 
@@ -129,27 +157,39 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
     handleBack();
   };
 
+  const updateMarkerStatus = (frame: number, status: RepStatus) => {
+    setCurrentMarkers((markers) =>
+      markers.map((m) => (m.frame === frame ? { ...m, status } : m))
+    );
+  };
   const goodMarkers = currentMarkers.filter((m) => m.status === "good");
   const badMarkers = currentMarkers.filter((m) => m.status === "bad");
   const notSureMarkers = currentMarkers.filter((m) => m.status === "notsure");
 
   return !task ? (
     <Container sx={{ height: "100%" }}>
-      <Stack flexDirection="row" gap={4}>
-        <Typography variant="h5">Loading...</Typography>
-        <CircularProgress />
-      </Stack>
+      <Box sx={{ py: 4 }} />
+      {errors ? (
+        <>
+          <Typography variant="h6">{errors}</Typography>
+          <Box sx={{ py: 4 }} />
+          <Button variant="outlined" onClick={handleBack}>
+            Back
+          </Button>
+        </>
+      ) : (
+        <Stack flexDirection="row" gap={4}>
+          <Typography variant="h5">Loading...</Typography>
+          <CircularProgress />
+        </Stack>
+      )}
     </Container>
   ) : selectedStatus ? (
     <CheckReps
       goBack={() => setSelectedStatus(null)}
       status={selectedStatus}
       framesFiltered={currentFrames}
-      updateMarkerStatus={(frame, status) => {
-        setCurrentMarkers((markers) =>
-          markers.map((m) => (m.frame === frame ? { ...m, status } : m))
-        );
-      }}
+      updateMarkerStatus={updateMarkerStatus}
       markers={currentMarkers}
       video={task.initial.url}
     />

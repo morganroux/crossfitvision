@@ -63,7 +63,11 @@ const CheckReps = (props: {
     [framesFiltered, markers]
   );
 
-  const currentMarker = markersFiltered[markerIdx];
+  const currentMarker = useMemo(() => {
+    console.log("Current marker: ", markersFiltered[markerIdx]);
+    return markersFiltered[markerIdx];
+  }, [markerIdx, markersFiltered]);
+
   const handlePrev = useCallback(() => {
     setSlideDirection("slideOutLeft");
     setTimeout(() => {

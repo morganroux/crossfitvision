@@ -6,7 +6,6 @@ export const getTasks = async () => {
     method: "get",
     url: `/tasks`,
   });
-  console.log("getTasks", data)
   return data;
 };
 
@@ -41,7 +40,5 @@ export const getTask = async (taskId: string) => {
     method: "get",
     url: `/task/${taskId}`,
   });
-  console.log("getTask", data)
-
   return data;
 };
