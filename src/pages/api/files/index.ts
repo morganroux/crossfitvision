@@ -1,4 +1,5 @@
 import { createSignedUrl } from "@/services/aws/s3";
+import { NextApiRequest, NextApiResponse } from "next";
 
 // export async function GET(
 //   request: Request,
@@ -18,10 +19,16 @@ import { createSignedUrl } from "@/services/aws/s3";
 
 //   return Response.json({ product });
 // }
-export async function POST(request: Request) {
-  const body = await request.json();
+async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).end(); // Method Not Allowed
+  }
+  const body = await req.body;
   // TODO : add suffix if file already exist (easier to manage for user)
   const { filename } = body as { filename: string };
   const { url, key, options } = await createSignedUrl({ filename });
-  return Response.json({ url, options, key });
+  return res.status(200).json({ url, options, key });
 }
+
+export default handler;

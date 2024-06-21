@@ -1,13 +1,18 @@
 import { getTasks } from "@/services/backendApi/tasks";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } },
-) {
-  const data = await getTasks();
+async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === "GET") {
+    const data = await getTasks();
 
-  return Response.json(data);
+    return res.status(200).json(data);
+  } else {
+    res.setHeader("Allow", ["GET"]);
+    res.status(405).end(); // Method Not Allowed
+  }
 }
+export default handler;
+
 // export async function POST(request: Request) {
 //   const body = await request.json();
 //   // TODO : add suffix if file already exist (easier to manage for user)

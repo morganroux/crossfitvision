@@ -1,6 +1,12 @@
 "use client";
 
-import { Close, Inbox, Mail, Menu as MenuIcon } from "@mui/icons-material";
+import {
+  Close,
+  Inbox,
+  Logout,
+  Mail,
+  Menu as MenuIcon,
+} from "@mui/icons-material";
 import {
   AppBar,
   Box,
@@ -12,13 +18,25 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import theme from "@/theme";
+import { NextPage } from "next";
+import { signOut } from "next-auth/react";
 
 const drawerWidth = 240;
-import theme from "@/theme";
+
+export type NextPageWithLayout<Props = {}, InitialProps = Props> = NextPage<
+  Props,
+  InitialProps
+> & {
+  getLayout?: (page: React.ReactElement) => React.ReactNode;
+  public?: boolean;
+};
+
 const DashboardLayout = ({
   children,
 }: Readonly<{
@@ -34,21 +52,26 @@ const DashboardLayout = ({
         position="fixed"
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={toggleDrawerOpen}
-            edge="start"
-            sx={{
-              marginRight: 5,
-            }}
-          >
-            {open ? <Close /> : <MenuIcon />}
+        <Toolbar sx={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Stack direction="row">
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={toggleDrawerOpen}
+              edge="start"
+              sx={{
+                marginRight: 5,
+              }}
+            >
+              {open ? <Close /> : <MenuIcon />}
+            </IconButton>
+            <Typography variant="h5" noWrap>
+              crossfit vision
+            </Typography>
+          </Stack>
+          <IconButton>
+            <Logout onClick={() => signOut({ callbackUrl: "/" })} />
           </IconButton>
-          <Typography variant="h5" noWrap>
-            crossfit vision
-          </Typography>
         </Toolbar>
       </AppBar>
       <Drawer

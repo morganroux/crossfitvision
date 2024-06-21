@@ -1,6 +1,6 @@
 "use client";
 
-import background from "../../public/pexels-2261477.jpg";
+import background from "/public/pexels-2261477.jpg";
 import MyDropzone from "@/components/MyDropZone";
 import { CachedTasks, TASKS_KEY, getCachedTasks } from "@/services/cache";
 import { putFileToS3 } from "@/services/nextApi/files";
@@ -24,6 +24,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import _ from "lodash";
 import { startCount } from "@/services/nextApi/count";
+
+import { GetServerSidePropsContext } from "next";
+import Layout from "../Layout";
+import { signOut } from "next-auth/react";
 
 const shake = keyframes`
   0%,
@@ -54,7 +58,7 @@ const shake = keyframes`
 
 `;
 
-const IndexPage = () => {
+const DashboardPage = () => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -62,7 +66,7 @@ const IndexPage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const tasksContainerRef = useRef<HTMLDivElement>(null);
   const [cachedTasks, setCachedTasks] = useState<CachedTasks | null>(null);
-  const [name, setName] = useState<string>("");
+  const [name, setName] = useState<string>("My analysis");
   const handleSend = async () => {
     setLoading(true);
     try {
@@ -180,7 +184,7 @@ const IndexPage = () => {
 
             <TextField
               label="Name"
-              defaultValue="My analysis"
+              value={name}
               onChange={(e) => setName(e.target.value)}
               variant="outlined"
               disabled={loading}
@@ -226,7 +230,10 @@ const IndexPage = () => {
         </Container>
       </Container>
 
-      <Container ref={tasksContainerRef} sx={{ height: "100vh" }}>
+      <Container
+        ref={tasksContainerRef}
+        sx={{ height: "100vh", display: "flex", flexDirection: "column" }}
+      >
         <Divider sx={{ my: 4 }} />
         <Typography variant="h4" textAlign="center" gutterBottom>
           Previous tasks
@@ -253,9 +260,19 @@ const IndexPage = () => {
             </Typography>
           )}
         </Stack>
+        <Box sx={{ flex: 1 }} />
+        <Button
+          sx={{ mb: 4, alignSelf: "center" }}
+          variant="contained"
+          onClick={() => {
+            signOut({ callbackUrl: "/" });
+          }}
+        >
+          Logout
+        </Button>
       </Container>
     </>
   );
 };
 
-export default IndexPage;
+export default DashboardPage;

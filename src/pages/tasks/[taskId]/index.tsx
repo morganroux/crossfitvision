@@ -13,12 +13,13 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import "./page.css";
+// import "./page.css";
 import { useEffect, useState } from "react";
 import CheckReps from "@/components/CheckReps";
-import { useRouter } from "next/navigation";
 import { CachedTasks, TASKS_KEY, Task } from "@/services/cache";
 import _ from "lodash";
+import Layout from "@/pages/Layout";
+import { useRouter } from "next/router";
 
 export type RepStatus = "good" | "bad" | "notsure";
 export type RepMarker = {
@@ -119,8 +120,9 @@ const getMarkers = (t: GetTaskResponse) => {
   return markers.sort((a, b) => a.frame - b.frame);
 };
 
-const TaskPage = ({ params }: { params: { taskId: string } }) => {
+const TaskPage = () => {
   const router = useRouter();
+  const { taskId } = router.query as { taskId: string };
   const theme = useTheme();
   const [task, setTask] = useState<{ name: string; payload: Task } | null>(
     null,
@@ -135,11 +137,11 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
     (async () => {
       const storage = localStorage.getItem(TASKS_KEY);
       const tasks = storage ? (JSON.parse(storage) as CachedTasks) : null;
-      let task = tasks?.[params.taskId];
+      let task = tasks?.[taskId];
       if (!task?.payload) {
         // const intervalId = setInterval(async () => {
         try {
-          const t = await getTask(params.taskId);
+          const t = await getTask(taskId);
           if ("message" in t) {
             setErrors(t.message as string);
             return;
@@ -147,7 +149,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
           if (t) {
             const markers = getMarkers(t);
             const newTask = {
-              name: tasks?.[params.taskId]?.name ?? "Untitled task",
+              name: tasks?.[taskId]?.name ?? "Untitled task",
               payload: { initial: t, markers: markers },
             };
 
@@ -156,7 +158,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             setTask(newTask);
             localStorage.setItem(
               TASKS_KEY,
-              JSON.stringify({ ...tasks, [params.taskId]: newTask }),
+              JSON.stringify({ ...tasks, [taskId]: newTask }),
             );
           }
         } catch (err) {
@@ -173,13 +175,13 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
         // };
         // localStorage.setItem(
         //   TASKS_KEY,
-        //   JSON.stringify({ ...tasks, [params.taskId]: task })
+        //   JSON.stringify({ ...tasks, [taskId]: task })
         // );
         // //
         setTask({ name: task.name, payload: task.payload });
       }
     })();
-  }, [params.taskId]);
+  }, [taskId]);
 
   useEffect(() => {
     if (task) setCurrentMarkers(task.payload.markers);
@@ -198,7 +200,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
       TASKS_KEY,
       JSON.stringify({
         ...JSON.parse(localStorage.getItem(TASKS_KEY) || "{}"),
-        [params.taskId]: _.merge(task, {
+        [taskId]: _.merge(task, {
           payload: { markers: currentMarkers },
         }),
       }),
@@ -373,4 +375,5 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
   );
 };
 
+TaskPage.getLayout = (page: React.ReactElement) => <Layout>{page}</Layout>;
 export default TaskPage;

@@ -1,4 +1,4 @@
-import { RepMarker } from "@/app/tasks/[taskId]/page";
+import { RepMarker } from "@/pages/tasks/[taskId]";
 import { GetTaskResponse } from "../backendApi/tasks";
 
 export interface Task {

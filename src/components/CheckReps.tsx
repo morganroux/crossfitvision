@@ -29,7 +29,7 @@ import {
   useState,
   MouseEventHandler,
 } from "react";
-import { RepMarker, RepStatus } from "../app/tasks/[taskId]/page";
+import { RepMarker, RepStatus } from "../pages/tasks/[taskId]";
 
 // const videos = [
 //   "https://event-copilot.s3.eu-west-1.amazonaws.com/crossfit/WhatsApp+Video+2024-04-24+at+19.56.05.mp4",
