@@ -52,7 +52,6 @@ const getMarkers = (t: GetTaskResponse) => {
     //   number,
     //   number,
     // ];
-    console.log("extractWindowView called", t.step_frames);
 
     const stepArray = [...t.step_frames];
     const stepArrayReverse = [...t.step_frames].reverse();
@@ -65,12 +64,16 @@ const getMarkers = (t: GetTaskResponse) => {
     let foundSteps = [0, 0] as [number, number];
     if (stepIndex) {
       //bad rep
-      if (t.failed_frames?.includes(frame) || t.uncertain_frames?.includes(frame)) {
+      if (
+        t.failed_frames?.includes(frame) ||
+        t.uncertain_frames?.includes(frame)
+      ) {
         foundSteps[0] =
           stepArrayReverse
             .slice(stepIndexReverse + 1)
-            .find(([sepType, stepFrame]) => sepType === "arms-straight-chin-down")?.[1] ??
-          0;
+            .find(
+              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down"
+            )?.[1] ?? 0;
         foundSteps[1] = frame;
       }
       // good rep
@@ -78,8 +81,9 @@ const getMarkers = (t: GetTaskResponse) => {
         foundSteps[0] =
           stepArrayReverse
             .slice(stepIndexReverse + 1)
-            .find(([sepType, stepFrame]) => sepType === "arms-straight-chin-down")?.[1] ??
-          0;
+            .find(
+              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down"
+            )?.[1] ?? 0;
         foundSteps[1] =
           stepArray
             .slice(stepIndex + 1)
@@ -88,7 +92,6 @@ const getMarkers = (t: GetTaskResponse) => {
             )?.[1] ?? 0;
       }
     }
-    console.log("foundSteps", foundSteps);
     return foundSteps;
   };
 
@@ -174,7 +177,6 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
   }, [params.taskId]);
 
   useEffect(() => {
-    console.log("Task: ", task);
     if (task) setCurrentMarkers(task.markers);
   }, [task]);
 

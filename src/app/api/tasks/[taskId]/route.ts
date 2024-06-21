@@ -4,7 +4,6 @@ export async function GET(
   request: Request,
   { params }: { params: { taskId: string } }
 ) {
-  console.log("params", params);
   const data = await getTask(params.taskId);
   return Response.json(data);
 }
