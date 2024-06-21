@@ -217,7 +217,7 @@ const CheckReps = (props: {
           >
             Bad Rep
           </Button>
-          <Button
+          {/* <Button
             onClick={(ev) => {
               makeBlink(ev);
               setTimeout(handleNotSure, 300);
@@ -228,7 +228,7 @@ const CheckReps = (props: {
             startIcon={<QuestionMark color="info" />}
           >
             Not Sure
-          </Button>
+          </Button> */}
           <Button
             onClick={(ev) => {
               makeBlink(ev);

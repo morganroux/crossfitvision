@@ -45,12 +45,51 @@ const getMarkers = (t: GetTaskResponse) => {
       number,
     ];
   };
+
   const extractWindowView = (frame: number) => {
-    const [previous, next] = findClosest(frame);
-    return [frame - (frame - previous) / 2, frame + (next - frame) / 2] as [
-      number,
-      number,
-    ];
+    // const [previous, next] = findClosest(frame);
+    // return [frame - (frame - previous) / 2, frame + (next - frame) / 2] as [
+    //   number,
+    //   number,
+    // ];
+    console.log("extractWindowView called", t.step_frames);
+
+    const stepArray = [...t.step_frames];
+    const stepArrayReverse = [...t.step_frames].reverse();
+    const stepIndex = stepArray.findIndex(
+      ([sepType, stepFrame]) => stepFrame === frame
+    );
+    const stepIndexReverse = stepArrayReverse.findIndex(
+      ([sepType, stepFrame]) => stepFrame === frame
+    );
+    let foundSteps = [0, 0] as [number, number];
+    if (stepIndex) {
+      //bad rep
+      if (t.failed_frames?.includes(frame) || t.uncertain_frames?.includes(frame)) {
+        foundSteps[0] =
+          stepArrayReverse
+            .slice(stepIndexReverse + 1)
+            .find(([sepType, stepFrame]) => sepType === "arms-straight-chin-down")?.[1] ??
+          0;
+        foundSteps[1] = frame;
+      }
+      // good rep
+      else if (t.rep_frames?.includes(frame)) {
+        foundSteps[0] =
+          stepArrayReverse
+            .slice(stepIndexReverse + 1)
+            .find(([sepType, stepFrame]) => sepType === "arms-straight-chin-down")?.[1] ??
+          0;
+        foundSteps[1] =
+          stepArray
+            .slice(stepIndex + 1)
+            .find(
+              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down"
+            )?.[1] ?? 0;
+      }
+    }
+    console.log("foundSteps", foundSteps);
+    return foundSteps;
   };
 
   const markers: RepMarker[] = [
@@ -65,11 +104,11 @@ const getMarkers = (t: GetTaskResponse) => {
 
       status: "good" as RepStatus,
     })),
-    ...(t.uncertain_frames ?? []).map((frame) => ({
-      in_out: extractWindowView(frame),
-      frame,
-      status: "notsure" as RepStatus,
-    })),
+    // ...(t.uncertain_frames ?? []).map((frame) => ({
+    //   in_out: extractWindowView(frame),
+    //   frame,
+    //   status: "notsure" as RepStatus,
+    // })),
   ];
   return markers.sort((a, b) => a.frame - b.frame);
 };
@@ -90,36 +129,36 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
       let task = tasks?.[params.taskId] as Task;
       if (!task) {
         // const intervalId = setInterval(async () => {
-          try {
-            const t = await getTask(params.taskId);
-            if ("message" in t) {
-              setErrors(t.message as string);
-              return;
-            }
-            if (t) {
-              {
-                const markers = getMarkers(t);
-                task = {
-                  initial: t,
-                  markers: markers,
-                };
-              }
-              // clearInterval(intervalId);
-              setErrors(null);
-              setTask(task);
-              localStorage.setItem(
-                TASKS_KEY,
-                JSON.stringify({ ...tasks, [params.taskId]: task })
-              );
-            }
-          } catch (err) {
-            console.error(err);
-            setErrors("Error while fetching analysis");
-            // clearInterval(intervalId);
+        try {
+          const t = await getTask(params.taskId);
+          if ("message" in t) {
+            setErrors(t.message as string);
+            return;
           }
+          if (t) {
+            {
+              const markers = getMarkers(t);
+              task = {
+                initial: t,
+                markers: markers,
+              };
+            }
+            // clearInterval(intervalId);
+            setErrors(null);
+            setTask(task);
+            localStorage.setItem(
+              TASKS_KEY,
+              JSON.stringify({ ...tasks, [params.taskId]: task })
+            );
+          }
+        } catch (err) {
+          console.error(err);
+          setErrors("Error while fetching analysis");
+          // clearInterval(intervalId);
+        }
         // }, 5000);
       } else {
-        // Uncomment to reinit marker generation
+        // // Uncomment to reinit marker generation
         // task = {
         //   ...task,
         //   markers: getMarkers(task.initial),
@@ -128,6 +167,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
         //   TASKS_KEY,
         //   JSON.stringify({ ...tasks, [params.taskId]: task })
         // );
+        // //
         setTask(task);
       }
     })();
@@ -242,7 +282,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             Check
           </Button>
         </Stack>
-        <Stack
+        {/* <Stack
           flexDirection="row"
           alignItems="center"
           justifyContent="space-between"
@@ -259,7 +299,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
           >
             Check
           </Button>
-        </Stack>
+        </Stack> */}
         <Box sx={{ py: 4 }} />
         <Stack
           flexDirection="row"
