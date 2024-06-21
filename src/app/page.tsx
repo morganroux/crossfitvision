@@ -2,7 +2,7 @@
 
 import background from "../../public/pexels-2261477.jpg";
 import MyDropzone from "@/components/MyDropZone";
-import { TASKS_KEY, getCachedTasks } from "@/services/cache";
+import { CachedTasks, TASKS_KEY, getCachedTasks } from "@/services/cache";
 import { putFileToS3 } from "@/services/nextApi/files";
 import { DeleteOutline, ExpandCircleDown } from "@mui/icons-material";
 import {
@@ -11,10 +11,13 @@ import {
   CircularProgress,
   Container,
   Divider,
+  FormControl,
   IconButton,
   Stack,
+  TextField,
   Typography,
   keyframes,
+  useTheme,
 } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -55,10 +58,11 @@ const IndexPage = () => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const theme = useTheme();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const tasksContainerRef = useRef<HTMLDivElement>(null);
-  const [taskIds, setTaskIds] = useState<string[]>([]);
-
+  const [cachedTasks, setCachedTasks] = useState<CachedTasks | null>(null);
+  const [name, setName] = useState<string>("");
   const handleSend = async () => {
     setLoading(true);
     try {
@@ -67,7 +71,7 @@ const IndexPage = () => {
       const storage = getCachedTasks();
       localStorage.setItem(
         TASKS_KEY,
-        JSON.stringify({ ...storage, [task_id]: null })
+        JSON.stringify({ ...storage, [task_id]: { name, task: null } }),
       );
       router.push(`/tasks/${task_id}`);
     } catch (error) {
@@ -90,14 +94,14 @@ const IndexPage = () => {
     // setTaskIds(tasks ? Object.keys(tasks) : []);
 
     const tasks = getCachedTasks();
-    setTaskIds(tasks ? Object.keys(tasks) : []);
+    setCachedTasks(tasks ?? null);
   };
 
   const deleteTask = (taskId: string) => {
     const tasks = getCachedTasks();
     delete tasks[taskId];
     localStorage.setItem("tasks", JSON.stringify(tasks));
-    setTaskIds(Object.keys(tasks));
+    setCachedTasks(tasks);
   };
 
   useEffect(() => {
@@ -174,6 +178,23 @@ const IndexPage = () => {
             </Box>
             <Box sx={{ my: 1 }} />
 
+            <TextField
+              label="Name"
+              defaultValue="My analysis"
+              onChange={(e) => setName(e.target.value)}
+              variant="outlined"
+              disabled={loading}
+              sx={{
+                [theme.breakpoints.down("md")]: {
+                  width: "90vw",
+                },
+                width: (theme) => theme.spacing(70),
+                "& .MuiInputBase-root": {
+                  background: "#00000075",
+                },
+              }}
+            />
+            <Box sx={{ my: 1 }} />
             {loading ? (
               <CircularProgress />
             ) : (
@@ -207,19 +228,19 @@ const IndexPage = () => {
 
       <Container ref={tasksContainerRef} sx={{ height: "100vh" }}>
         <Divider sx={{ my: 4 }} />
-        <Typography variant="h4" textAlign="center">
+        <Typography variant="h4" textAlign="center" gutterBottom>
           Previous tasks
         </Typography>
         <Stack alignItems="flex-start">
-          {taskIds?.length ? (
-            taskIds.map((taskId) => (
+          {cachedTasks ? (
+            Object.entries(cachedTasks).map(([taskId, task]) => (
               <Stack flexDirection="row" alignItems="center" key={taskId}>
                 <Button
                   variant="text"
                   color="primary"
                   onClick={() => router.push(`/tasks/${taskId}`)}
                 >
-                  {taskId}
+                  {task.name}
                 </Button>
                 <IconButton color="error" onClick={() => deleteTask(taskId)}>
                   <DeleteOutline />

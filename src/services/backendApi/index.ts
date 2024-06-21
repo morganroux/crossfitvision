@@ -4,8 +4,7 @@ import axiosBetterStacktrace from "axios-better-stacktrace";
 // This api should be used only client side
 
 const backendApi = axios.create({
-  baseURL:
-    "http://ec2-35-180-173-194.eu-west-3.compute.amazonaws.com",
+  baseURL: "http://ec2-35-180-173-194.eu-west-3.compute.amazonaws.com",
   timeout: 30000,
 });
 

@@ -58,9 +58,9 @@ const CheckReps = (props: {
   const markersFiltered = useMemo(
     () =>
       markers.filter((marker) =>
-        framesFiltered.find((f) => f === marker.frame)
+        framesFiltered.find((f) => f === marker.frame),
       ),
-    [framesFiltered, markers]
+    [framesFiltered, markers],
   );
 
   const currentMarker = useMemo(() => {
@@ -72,7 +72,7 @@ const CheckReps = (props: {
     setSlideDirection("slideOutLeft");
     setTimeout(() => {
       setMarkerIdx(
-        (idx) => (idx - 1 + markersFiltered.length) % markersFiltered.length
+        (idx) => (idx - 1 + markersFiltered.length) % markersFiltered.length,
       );
       setSlideDirection("slideInRight");
     }, 200);
@@ -137,7 +137,7 @@ const CheckReps = (props: {
     good: "Valid reps",
   };
   return (
-    <Container sx={{ height: "100%" }}>
+    <Container sx={{ height: "100%", pt: 3 }}>
       <Typography variant="h3" gutterBottom>
         {title[props.status]}
       </Typography>

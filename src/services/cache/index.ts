@@ -6,7 +6,7 @@ export interface Task {
   markers: RepMarker[];
 }
 export interface CachedTasks {
-  [taskId: string]: null | Task;
+  [taskId: string]: { name: string; payload: null | Task };
 }
 
 export const TASKS_KEY = "tasks";

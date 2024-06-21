@@ -50,6 +50,7 @@ const MyDropzone = (props: {
           }}
         >
           <IconButton
+            disabled={disabled}
             onClick={() => handleChange([])}
             sx={{ alignSelf: "flex-end" }}
           >

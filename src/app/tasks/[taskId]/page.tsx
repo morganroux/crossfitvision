@@ -1,13 +1,15 @@
 "use client";
 
 import { GetTaskResponse, getTask } from "@/services/nextApi/tasks";
-import { Start } from "@mui/icons-material";
+import { Edit, Start } from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
+  IconButton,
   Stack,
+  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -16,6 +18,7 @@ import { useEffect, useState } from "react";
 import CheckReps from "@/components/CheckReps";
 import { useRouter } from "next/navigation";
 import { CachedTasks, TASKS_KEY, Task } from "@/services/cache";
+import _ from "lodash";
 
 export type RepStatus = "good" | "bad" | "notsure";
 export type RepMarker = {
@@ -56,10 +59,10 @@ const getMarkers = (t: GetTaskResponse) => {
     const stepArray = [...t.step_frames];
     const stepArrayReverse = [...t.step_frames].reverse();
     const stepIndex = stepArray.findIndex(
-      ([sepType, stepFrame]) => stepFrame === frame
+      ([sepType, stepFrame]) => stepFrame === frame,
     );
     const stepIndexReverse = stepArrayReverse.findIndex(
-      ([sepType, stepFrame]) => stepFrame === frame
+      ([sepType, stepFrame]) => stepFrame === frame,
     );
     let foundSteps = [0, 0] as [number, number];
     if (stepIndex) {
@@ -72,7 +75,7 @@ const getMarkers = (t: GetTaskResponse) => {
           stepArrayReverse
             .slice(stepIndexReverse + 1)
             .find(
-              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down"
+              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down",
             )?.[1] ?? 0;
         foundSteps[1] = frame;
       }
@@ -82,13 +85,13 @@ const getMarkers = (t: GetTaskResponse) => {
           stepArrayReverse
             .slice(stepIndexReverse + 1)
             .find(
-              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down"
+              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down",
             )?.[1] ?? 0;
         foundSteps[1] =
           stepArray
             .slice(stepIndex + 1)
             .find(
-              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down"
+              ([sepType, stepFrame]) => sepType === "arms-straight-chin-down",
             )?.[1] ?? 0;
       }
     }
@@ -119,7 +122,10 @@ const getMarkers = (t: GetTaskResponse) => {
 const TaskPage = ({ params }: { params: { taskId: string } }) => {
   const router = useRouter();
   const theme = useTheme();
-  const [task, setTask] = useState<Task | null>(null);
+  const [task, setTask] = useState<{ name: string; payload: Task } | null>(
+    null,
+  );
+  const [editName, setEditName] = useState<string | null>(null);
   const [currentMarkers, setCurrentMarkers] = useState<RepMarker[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<RepStatus | null>(null);
   const [currentFrames, setCurrentFrames] = useState<number[]>([]);
@@ -129,8 +135,8 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
     (async () => {
       const storage = localStorage.getItem(TASKS_KEY);
       const tasks = storage ? (JSON.parse(storage) as CachedTasks) : null;
-      let task = tasks?.[params.taskId] as Task;
-      if (!task) {
+      let task = tasks?.[params.taskId];
+      if (!task?.payload) {
         // const intervalId = setInterval(async () => {
         try {
           const t = await getTask(params.taskId);
@@ -139,19 +145,18 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
             return;
           }
           if (t) {
-            {
-              const markers = getMarkers(t);
-              task = {
-                initial: t,
-                markers: markers,
-              };
-            }
+            const markers = getMarkers(t);
+            const newTask = {
+              name: tasks?.[params.taskId]?.name ?? "Untitled task",
+              payload: { initial: t, markers: markers },
+            };
+
             // clearInterval(intervalId);
             setErrors(null);
-            setTask(task);
+            setTask(newTask);
             localStorage.setItem(
               TASKS_KEY,
-              JSON.stringify({ ...tasks, [params.taskId]: task })
+              JSON.stringify({ ...tasks, [params.taskId]: newTask }),
             );
           }
         } catch (err) {
@@ -171,19 +176,19 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
         //   JSON.stringify({ ...tasks, [params.taskId]: task })
         // );
         // //
-        setTask(task);
+        setTask({ name: task.name, payload: task.payload });
       }
     })();
   }, [params.taskId]);
 
   useEffect(() => {
-    if (task) setCurrentMarkers(task.markers);
+    if (task) setCurrentMarkers(task.payload.markers);
   }, [task]);
 
   const handleCheck = (status: RepStatus) => {
     setSelectedStatus(status);
     setCurrentFrames(
-      currentMarkers.filter((m) => m.status === status).map((m) => m.frame)
+      currentMarkers.filter((m) => m.status === status).map((m) => m.frame),
     );
   };
   const handleBack = () => router.push("/");
@@ -193,15 +198,17 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
       TASKS_KEY,
       JSON.stringify({
         ...JSON.parse(localStorage.getItem(TASKS_KEY) || "{}"),
-        [params.taskId]: { ...task, markers: currentMarkers },
-      })
+        [params.taskId]: _.merge(task, {
+          payload: { markers: currentMarkers },
+        }),
+      }),
     );
     handleBack();
   };
 
   const updateMarkerStatus = (frame: number, status: RepStatus) => {
     setCurrentMarkers((markers) =>
-      markers.map((m) => (m.frame === frame ? { ...m, status } : m))
+      markers.map((m) => (m.frame === frame ? { ...m, status } : m)),
     );
   };
   const goodMarkers = currentMarkers.filter((m) => m.status === "good");
@@ -209,8 +216,7 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
   const notSureMarkers = currentMarkers.filter((m) => m.status === "notsure");
 
   return !task ? (
-    <Container sx={{ height: "100%" }}>
-      <Box sx={{ py: 4 }} />
+    <Container sx={{ height: "100%", pt: 3 }}>
       {errors ? (
         <>
           <Typography variant="h6">{errors}</Typography>
@@ -233,11 +239,58 @@ const TaskPage = ({ params }: { params: { taskId: string } }) => {
       framesFiltered={currentFrames}
       updateMarkerStatus={updateMarkerStatus}
       markers={currentMarkers}
-      video={task.initial.url}
+      video={task.payload.initial.url}
     />
   ) : (
-    <Container sx={{ height: "100%" }}>
-      <Typography variant="h3">{`Task ${task.initial.uuid}`}</Typography>
+    <Container sx={{ height: "100%", pt: 3 }}>
+      <Stack flexDirection="column" alignItems="flex-start">
+        {editName ? (
+          <TextField
+            value={editName}
+            autoFocus
+            size="small"
+            onBlur={() => {
+              setTask({
+                ...task,
+                name: !editName?.length ? "Untitled task" : editName,
+              });
+              setEditName(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setTask({
+                  ...task,
+                  name: !editName?.length ? "Untitled task" : editName,
+                });
+                setEditName(null);
+              }
+              if (e.key === "Escape") setEditName(null);
+            }}
+            onChange={(e) => setEditName(e.target.value)}
+            variant="standard"
+            sx={{
+              "& .MuiInputBase-input": {
+                ...theme.typography.h3,
+              },
+            }}
+          />
+        ) : (
+          <Stack flexDirection="row">
+            <Typography
+              variant="h3"
+              sx={{ textTransform: "capitalize" }}
+            >{`${task.name}`}</Typography>
+            <IconButton
+              color="secondary"
+              sx={{ alignSelf: "flex-end", ml: 3 }}
+              onClick={() => setEditName(task.name)}
+            >
+              <Edit />
+            </IconButton>
+          </Stack>
+        )}
+        <Typography variant="caption">{`${task.payload.initial.uuid}`}</Typography>
+      </Stack>
       <Box sx={{ py: 4 }} />
 
       <Stack

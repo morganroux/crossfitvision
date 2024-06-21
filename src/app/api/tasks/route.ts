@@ -2,7 +2,7 @@ import { getTasks } from "@/services/backendApi/tasks";
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } },
 ) {
   const data = await getTasks();
 
