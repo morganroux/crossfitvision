@@ -1,5 +1,3 @@
-"use client";
-
 import background from "/public/pexels-2261477.jpg";
 import MyDropzone from "@/components/MyDropZone";
 import { CachedTasks, TASKS_KEY, getCachedTasks } from "@/services/cache";
@@ -75,7 +73,7 @@ const DashboardPage = () => {
       const storage = getCachedTasks();
       localStorage.setItem(
         TASKS_KEY,
-        JSON.stringify({ ...storage, [task_id]: { name, task: null } }),
+        JSON.stringify({ ...storage, [task_id]: { name, task: null } })
       );
       router.push(`/tasks/${task_id}`);
     } catch (error) {

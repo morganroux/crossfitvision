@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.4",
+    "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.5",
     "@fontsource/roboto": "^5.0.13",
     "@mui/icons-material": "^5.15.16",
@@ -22,7 +23,7 @@
     "axios-better-stacktrace": "^2.1.6",
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
-    "next": "14.2.3",
+    "next": "^14.2.4",
     "next-auth": "^4.24.7",
     "react": "^18",
     "react-dom": "^18",

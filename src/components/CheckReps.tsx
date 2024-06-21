@@ -1,4 +1,4 @@
-"use client";
+
 
 import MyReactPlayer from "@/components/MyReactPlayer";
 import {

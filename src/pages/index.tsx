@@ -1,5 +1,3 @@
-"use client";
-
 import background from "../../public/pexels-2261477.jpg";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import Image from "next/image";
