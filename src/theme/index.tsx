@@ -1,4 +1,3 @@
-
 import localFont from "next/font/local";
 import { Roboto } from "next/font/google";
 import { createTheme } from "@mui/material/styles";
@@ -38,10 +37,10 @@ const theme = createTheme(baseTheme, {
       fontSize: "10em",
       color: baseTheme.palette.primary.main,
       textTransform: "uppercase",
-      [baseTheme.breakpoints.down("md")]: {
+      [baseTheme.breakpoints.down("lg")]: {
         fontSize: "9em",
       },
-      [baseTheme.breakpoints.down("sm")]: {
+      [baseTheme.breakpoints.down("md")]: {
         fontSize: "6em",
         lineHeight: 1,
       },

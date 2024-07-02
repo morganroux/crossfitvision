@@ -1,8 +1,14 @@
 import background from "../../public/pexels-2261477.jpg";
-import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Container,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import Image from "next/image";
 import _ from "lodash";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import { auth } from "./api/auth/[...nextauth]";
@@ -53,12 +59,61 @@ const IndexPage = () => {
         crossfit vision
       </Typography>
 
-      <Container sx={{ position: "relative", zIndex: 2 }}>
-        <Stack alignItems="center">
-          <Box sx={{ my: 4 }} />
-          <Button onClick={() => router.push("/dashboard")} variant="contained">
-            Sign in
-          </Button>
+      <Container
+        sx={{
+          position: "relative",
+          zIndex: 2,
+          height: "100%",
+        }}
+      >
+        <Stack
+          alignItems="center"
+          flexDirection="column"
+          sx={{ height: "100%", mt: 8 }}
+        >
+          {/* <Box sx={{ flex: 1 }} /> */}
+
+          <Typography
+            variant="h2"
+            align="center"
+            sx={{
+              fontSize: {
+                xs: "3rem",
+                sm: "4rem",
+              },
+            }}
+          >
+            The first AI judge for CrossFit competitions
+          </Typography>
+          <Box sx={{ my: 8 }} />
+          <Stack
+            gap={4}
+            sx={{
+              flexDirection: {
+                xs: "column",
+                sm: "row",
+              },
+            }}
+          >
+            <Button
+              size="large"
+              onClick={() =>
+                window && window.open("https://calendly.com/roux-morgan/30min")
+              }
+              variant="contained"
+              color="inherit"
+            >
+              Book a demo
+            </Button>
+            <Button
+              size="large"
+              onClick={() => router.push("/dashboard")}
+              variant="contained"
+            >
+              Sign in
+            </Button>
+          </Stack>
+          <Box sx={{ flex: 1 }} />
         </Stack>
       </Container>
     </Container>

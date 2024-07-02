@@ -1,5 +1,3 @@
-
-
 import MyReactPlayer from "@/components/MyReactPlayer";
 import {
   ArrowBack,

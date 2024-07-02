@@ -73,7 +73,7 @@ const DashboardPage = () => {
       const storage = getCachedTasks();
       localStorage.setItem(
         TASKS_KEY,
-        JSON.stringify({ ...storage, [task_id]: { name, task: null } })
+        JSON.stringify({ ...storage, [task_id]: { name, task: null } }),
       );
       router.push(`/tasks/${task_id}`);
     } catch (error) {
