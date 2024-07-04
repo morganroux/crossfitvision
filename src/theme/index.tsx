@@ -24,6 +24,9 @@ const baseTheme = createTheme({
     primary: {
       main: "#EA1506",
     },
+    secondary: {
+      main: "#3F1099",
+    },
     background: {
       default: "black",
     },
@@ -41,7 +44,7 @@ const theme = createTheme(baseTheme, {
         fontSize: "9em",
       },
       [baseTheme.breakpoints.down("md")]: {
-        fontSize: "6em",
+        fontSize: "5em",
         lineHeight: 1,
       },
     },

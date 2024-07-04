@@ -3,7 +3,7 @@ import Document, { Html, Head, Main, NextScript } from "next/document";
 import createEmotionCache from "../config/createEmotionCache";
 import createEmotionServer from "@emotion/server/create-instance";
 
-const APP_NAME = "Crossfit Vision";
+const APP_NAME = "Functionnal AI";
 const APP_DESCRIPTION =
   "The first AI-powered fitness judge for competitive sports";
 

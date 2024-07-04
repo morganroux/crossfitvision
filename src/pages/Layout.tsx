@@ -66,7 +66,7 @@ const DashboardLayout = ({
               {open ? <Close /> : <MenuIcon />}
             </IconButton>
             <Typography variant="h5" noWrap>
-              crossfit vision
+              Functionnal AI
             </Typography>
           </Stack>
           <IconButton>
