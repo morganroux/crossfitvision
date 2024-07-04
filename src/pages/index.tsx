@@ -56,7 +56,7 @@ const IndexPage = () => {
         textAlign="center"
         sx={{ zIndex: 2, position: "relative" }}
       >
-        Functionnal AI
+        Functional AI
       </Typography>
 
       <Container

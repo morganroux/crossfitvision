@@ -162,7 +162,7 @@ const DashboardPage = () => {
           textAlign="center"
           sx={{ zIndex: 2, position: "relative", flex: 1 }}
         >
-          Functionnal AI
+          Functional AI
         </Typography>
 
         <Container sx={{ position: "relative", zIndex: 2 }}>

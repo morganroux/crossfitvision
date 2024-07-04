@@ -36,7 +36,7 @@ function MyApp(props: AppPropsWithLayout) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{`Functionnal AI`}</title>
+        <title>{`Functional AI`}</title>
       </Head>
       <SessionProvider session={session}>
         <CacheProvider value={emotionCache}>
