@@ -65,6 +65,9 @@ const theme = createTheme(baseTheme, {
     h6: {
       fontFamily: alternateGothic.style.fontFamily,
     },
+    body2: {
+      color: "#DDDDDD",
+    },
   },
 });
 
