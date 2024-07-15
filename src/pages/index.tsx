@@ -113,7 +113,7 @@ const IndexPage = () => {
                 },
               }}
             >
-              The first AI judge for CrossFit competitions
+              The first AI judge for CrossFit® competitions
             </Typography>
             <Box sx={{ my: 8 }} />
             <Stack
